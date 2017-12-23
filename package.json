@@ -1,0 +1,22 @@
+{
+  "name": "@maxbrunsfeld/flame-graph",
+  "version": "0.1.0",
+  "description": "Profile a process or command and produce a flame graph",
+  "main": "src/generate-flame-graph.js",
+  "bin": {
+    "generate-flame-graph": "./bin/generate-flame-graph"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Max Brunsfeld",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^4.0.1"
+  },
+  "dependencies": {
+    "dedent": "^0.7.0",
+    "temp": "^0.8.3",
+    "yargs": "^10.0.3"
+  }
+}
