@@ -4,31 +4,27 @@ const temp = require("temp")
 const {spawn} = require("child_process")
 const StackAggregator = require('./stack-aggregator')
 
-exports.getFlameGraphLayout = function (content) {
-  return [
-    '<!DOCTYPE HTML>',
-    '<head>',
-    '<style>',
-    fs.readFileSync(path.join(__dirname, 'style.css')),
-    '</style>',
-    '</head>',
-    '<body>',
-    content,
-    '</body>'
-  ].join('\n')
+const FRAME_HEIGHT = 24
+
+exports.generateFlameGraphForCommand = async function (command, options = {}) {
+  const html = await generateFlameGraph(['-c', command], options)
+  if (options.fullPage) {
+    return wrapHTML(html)
+  } else {
+    return html
+  }
 }
 
-exports.generateFlameGraphForCommand = async function (command, env, options) {
-  const flameGraphData = await generateFlameGraph(['-c', command], env, options)
-  return renderFlameGraph(flameGraphData)
+exports.generateFlameGraphForProcess = async function (pid, options = {}) {
+  const html = await generateFlameGraph(['-p', pid], options)
+  if (options.fullPage) {
+    return wrapHTML(html)
+  } else {
+    return html
+  }
 }
 
-exports.generateFlameGraphForProcess = async function (pid, env, options) {
-  const flameGraphData = await generateFlameGraph(['-p', pid], env, options)
-  return renderFlameGraph(flameGraphData)
-}
-
-function generateFlameGraph (args, env, {functionNameFilter, askpass}) {
+function generateFlameGraph (args, {env = {}, functionNameFilter, askpass} = {}) {
   const stacksOutputFile = temp.openSync({prefix: 'trace.out'})
 
   const dtraceProcess = spawn('sudo', [
@@ -61,39 +57,75 @@ function generateFlameGraph (args, env, {functionNameFilter, askpass}) {
         return reject(new Error(`Dtrace processes failed. Code: ${code}, Stderr: ${stderr}`))
       }
 
+      fs.closeSync(stacksOutputFile.fd)
       fs.readFile(stacksOutputFile.path, 'utf8', (error, output) => {
         if (error) return reject(error)
 
         const aggregator = new StackAggregator(2000, functionNameFilter);
         aggregator.addStacks(output);
-        resolve(aggregator.getBlocksToRender())
+        resolve(renderFlameGraph(aggregator.getBlocksToRender()))
       })
     })
   })
 }
-
-const FRAME_HEIGHT = 24
 
 function renderFlameGraph (data) {
   let maxDepth = 0
 
   let callDivs = ''
   for (let block of data) {
-    if (block.depth > maxDepth) maxDepth = block.depth;
-    const name = block.name.split('`').pop();
+    if (block.depth > maxDepth) maxDepth = block.depth
+
+    const name = escapeHTML(block.name.split('`').pop())
+    const shortName = shortenFunctionName(name)
+
     callDivs += '\n'
       + `<div `
       + `  class="flame-graph-frame"`
       + `  title="name:\t${name}\nduration:\t${block.duration}ms" `
       + `  style="width: ${block.width}%; left: ${block.left}%; bottom: ${(block.depth * FRAME_HEIGHT)}px; height: ${FRAME_HEIGHT}px;"`
-      + `>${name}</div>`
+      + `>${shortName}</div>`
   }
 
-  return
+  return (
     `<div class="flame-graph-scroll-view" style="height: ${maxDepth * FRAME_HEIGHT}px">` +
     '\n' +
     callDivs +
     '\n' +
     '</div>'
-  `
+  )
+}
+
+function wrapHTML (content) {
+  return [
+    '<!DOCTYPE HTML>',
+    '<head>',
+    '<style>',
+    fs.readFileSync(path.join(__dirname, 'style.css')),
+    '</style>',
+    '</head>',
+    '<body>',
+    content,
+    '</body>'
+  ].join('\n')
+}
+
+function escapeHTML(string) {
+  return string
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+}
+
+function shortenFunctionName (name) {
+  let result = name
+
+  const parenIndex = result.indexOf('(')
+  if (parenIndex > 0) result = result.slice(0, parenIndex)
+
+  const colonIndex = result.lastIndexOf(':')
+  if (colonIndex >= 0) result = result.slice(colonIndex + 1)
+
+  return result
 }
