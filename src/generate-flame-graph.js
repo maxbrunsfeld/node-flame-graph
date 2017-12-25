@@ -100,6 +100,7 @@ function wrapHTML (content) {
   return [
     '<!DOCTYPE HTML>',
     '<head>',
+    '<title>Flame Graph</title>',
     '<style>',
     fs.readFileSync(path.join(__dirname, 'style.css')),
     '</style>',
