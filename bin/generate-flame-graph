@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 const {argv} = require('yargs')
-const {generateFlameGraphForCommand, generateFlameGraphForProcess} = require('../src/generate-flame-graph')
+const {
+  generateFlameGraphForCommand,
+  generateFlameGraphForProcess
+} = require('../src/generate-flame-graph')
 
 const pid = argv.pid || argv.p
 const command = argv.command || argv.c
@@ -11,7 +14,10 @@ async function main () {
   if (command) {
     console.log(await generateFlameGraphForCommand(command, {functionNameFilter, fullPage: true}))
   } else if (pid) {
-    console.log(await generateFlameGraphForProcess(pid, {functionNameFilter, fullPage: true}))
+    const {stop, result} = generateFlameGraphForProcess(pid, {functionNameFilter, fullPage: true})
+    process.stdin.on('data', () => {})
+    process.stdin.on('end', () => stop())
+    console.log(await result)
   } else {
     console.log(`Usage: ${process.argv[1]} [-c COMMAND | -p PID]`)
   }

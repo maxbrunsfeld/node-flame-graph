@@ -7,7 +7,8 @@ const StackAggregator = require('./stack-aggregator')
 const FRAME_HEIGHT = 24
 
 exports.generateFlameGraphForCommand = async function (command, options = {}) {
-  const html = await generateFlameGraph(['-c', command], options)
+  const {output} = generateFlameGraph(['-c', command], options)
+  const html = await output
   if (options.fullPage) {
     return wrapHTML(html)
   } else {
@@ -15,12 +16,24 @@ exports.generateFlameGraphForCommand = async function (command, options = {}) {
   }
 }
 
-exports.generateFlameGraphForProcess = async function (pid, options = {}) {
-  const html = await generateFlameGraph(['-p', pid], options)
-  if (options.fullPage) {
-    return wrapHTML(html)
-  } else {
-    return html
+exports.generateFlameGraphForProcess = function (pidToProfile, options = {}) {
+  const {output, pid} = generateFlameGraph(['-p', pidToProfile], options)
+  return {
+    stop () {
+      spawn('sudo', [
+        ...(options.askpass ? ['-A'] : []),
+        'kill',
+        pid
+      ])
+    },
+
+    result: output.then(html => {
+      if (options.fullPage) {
+        return wrapHTML(html)
+      } else {
+        return html
+      }
+    })
   }
 }
 
@@ -51,22 +64,25 @@ function generateFlameGraph (args, {env = {}, functionNameFilter, askpass} = {})
     stderr += data.toString('utf8')
   })
 
-  return new Promise((resolve, reject) => {
-    dtraceProcess.on('close', code => {
-      if (code !== 0) {
-        return reject(new Error(`Dtrace processes failed. Code: ${code}, Stderr: ${stderr}`))
-      }
+  return {
+    pid: dtraceProcess.pid,
+    output: new Promise((resolve, reject) => {
+      dtraceProcess.on('close', code => {
+        if (code !== 0) {
+          return reject(new Error(`Dtrace processes failed. Code: ${code}, Stderr: ${stderr}`))
+        }
 
-      fs.closeSync(stacksOutputFile.fd)
-      fs.readFile(stacksOutputFile.path, 'utf8', (error, output) => {
-        if (error) return reject(error)
+        fs.closeSync(stacksOutputFile.fd)
+        fs.readFile(stacksOutputFile.path, 'utf8', (error, output) => {
+          if (error) return reject(error)
 
-        const aggregator = new StackAggregator(2000, functionNameFilter);
-        aggregator.addStacks(output);
-        resolve(renderFlameGraph(aggregator.getBlocksToRender()))
+          const aggregator = new StackAggregator(2000, functionNameFilter);
+          aggregator.addStacks(output);
+          resolve(renderFlameGraph(aggregator.getBlocksToRender()))
+        })
       })
     })
-  })
+  }
 }
 
 function renderFlameGraph (data) {
