@@ -18,22 +18,25 @@ exports.generateFlameGraphForCommand = async function (command, options = {}) {
 
 exports.generateFlameGraphForProcess = function (pidToProfile, options = {}) {
   const {output, pid} = generateFlameGraph(['-p', pidToProfile], options)
-  return {
-    stop () {
-      spawn('sudo', [
-        ...(options.askpass ? ['-A'] : []),
-        'kill',
-        pid
-      ])
-    },
-
-    result: output.then(html => {
-      if (options.fullPage) {
-        return wrapHTML(html)
-      } else {
-        return html
-      }
+  return async function () {
+    spawn('sudo', [
+      ...(options.askpass ? ['-A'] : []),
+      'kill',
+      pid
+    ], {
+      env: Object.assign(
+        {},
+        process.env,
+        options.env || {}
+      )
     })
+
+    const html = await output
+    if (options.fullPage) {
+      return wrapHTML(html)
+    } else {
+      return html
+    }
   }
 }
 
