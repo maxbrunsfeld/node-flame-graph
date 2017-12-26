@@ -14,9 +14,10 @@ async function main () {
   if (command) {
     console.log(await generateFlameGraphForCommand(command, {functionNameFilter, fullPage: true}))
   } else if (pid) {
-    const stop = generateFlameGraphForProcess(pid, {functionNameFilter, fullPage: true})
-    process.stdin.on('data', () => {})
-    process.stdin.on('end', async () => console.log(await stop()))
+    const {html, stop} = generateFlameGraphForProcess(pid, {functionNameFilter, fullPage: true})
+    process.on('SIGINT', () => stop())
+    console.log(await html)
+    process.exit(0)
   } else {
     console.log(`Usage: ${process.argv[1]} [-c COMMAND | -p PID]`)
   }
