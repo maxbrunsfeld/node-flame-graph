@@ -105,12 +105,14 @@ function renderFlameGraph (data) {
       + `<div `
       + `  class="flame-graph-frame"`
       + `  title="name:\t${name}\nduration:\t${block.duration}ms" `
-      + `  style="width: ${block.width}%; left: ${block.left}%; bottom: ${(block.depth * FRAME_HEIGHT)}px; height: ${FRAME_HEIGHT}px;"`
+      + `  style="position: absolute; overflow: hidden;`
+      + ` width: ${block.width}%; left: ${block.left}%;`
+      + ` bottom: ${(block.depth * FRAME_HEIGHT)}px; height: ${FRAME_HEIGHT}px;"`
       + `>${shortName}</div>`
   }
 
   return (
-    `<div class="flame-graph-scroll-view" style="height: ${maxDepth * FRAME_HEIGHT}px">` +
+    `<div class="flame-graph-scroll-view" style="position: relative; height: ${maxDepth * FRAME_HEIGHT}px">` +
     '\n' +
     callDivs +
     '\n' +
@@ -127,7 +129,7 @@ function wrapHTML (content) {
     fs.readFileSync(path.join(__dirname, 'style.css')),
     '</style>',
     '</head>',
-    '<body>',
+    '<body style="overflow: auto;">',
     content,
     '</body>'
   ].join('\n')

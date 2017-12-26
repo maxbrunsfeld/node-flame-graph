@@ -1,22 +1,7 @@
-.flame-graph-view {
-  background-color: white;
-  padding: 20px;
-  overflow: auto;
-}
-
-.flame-graph-scroll-view {
-  position: relative;
-  overflow: hidden;
-}
-
 .flame-graph-frame {
-  position: absolute;
-  overflow: hidden;
   cursor: default;
-
   box-sizing: border-box;
   padding: 2px;
-
   background-color: rgb(242, 163, 111);
   border: 1px solid white;
   font-size: 12px;
