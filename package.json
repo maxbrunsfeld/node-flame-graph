@@ -1,6 +1,6 @@
 {
   "name": "@maxbrunsfeld/flame-graph",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Profile a process or command and produce a flame graph",
   "main": "src/generate-flame-graph.js",
   "bin": {
