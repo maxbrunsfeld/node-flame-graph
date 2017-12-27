@@ -1,8 +1,11 @@
 module.exports =
 class StackAggregator {
-  constructor (sampleRate, containingFunctionName) {
+  constructor (sampleRate, functionNames) {
     this.sampleRate = sampleRate
-    this.containingFunctionName = containingFunctionName
+    this.functionNames = functionNames
+    if (typeof this.functionNames === 'string') {
+      this.functionNames = [this.functionNames]
+    }
     this.countedStacks = {}
   }
 
@@ -19,10 +22,14 @@ class StackAggregator {
 
   addStack (stack) {
     let truncatedStack
-    if (this.containingFunctionName) {
-      const containingFunctionIndex = stack.lastIndexOf(this.containingFunctionName)
-      if (containingFunctionIndex !== -1) {
-        const truncatedEndIndex = stack.indexOf('\n', containingFunctionIndex)
+    if (this.functionNames && this.functionNames.length > 0) {
+      let functionNameIndex = -1
+      for (const functionName of this.functionNames) {
+        const index = stack.lastIndexOf(functionName)
+        if (index > functionNameIndex) functionNameIndex = index
+      }
+      if (functionNameIndex !== -1) {
+        const truncatedEndIndex = stack.indexOf('\n', functionNameIndex)
         truncatedStack = stack.slice(0, truncatedEndIndex) + stack.slice(stack.lastIndexOf('\n'))
       }
     } else {

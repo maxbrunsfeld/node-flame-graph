@@ -8,13 +8,15 @@ const {
 
 const pid = argv.pid || argv.p
 const command = argv.command || argv.c
-const functionNameFilter = argv.function || argv.f
+let functionNames = argv.function || argv.functions || argv.f
+
+if (functionNames) functionNames = functionNames.split(/\s+/).map(name => name.trim())
 
 async function main () {
   if (command) {
-    console.log(await generateFlameGraphForCommand(command, {functionNameFilter, fullPage: true}))
+    console.log(await generateFlameGraphForCommand(command, {functionNames, fullPage: true}))
   } else if (pid) {
-    const {html, stop} = generateFlameGraphForProcess(pid, {functionNameFilter, fullPage: true})
+    const {html, stop} = generateFlameGraphForProcess(pid, {functionNames, fullPage: true})
     process.on('SIGINT', () => stop())
     console.log(await html)
     process.exit(0)

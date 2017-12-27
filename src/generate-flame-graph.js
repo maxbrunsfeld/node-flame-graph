@@ -43,7 +43,7 @@ exports.generateFlameGraphForProcess = function (pidToProfile, options = {}) {
   }
 }
 
-function generateFlameGraph (args, {env = {}, functionNameFilter, askpass} = {}) {
+function generateFlameGraph (args, {env = {}, functionNames, askpass} = {}) {
   const stacksOutputFile = temp.openSync({prefix: 'trace.out'})
 
   const dtraceProcess = spawn('sudo', [
@@ -82,7 +82,7 @@ function generateFlameGraph (args, {env = {}, functionNameFilter, askpass} = {})
         fs.readFile(stacksOutputFile.path, 'utf8', (error, output) => {
           if (error) return reject(error)
 
-          const aggregator = new StackAggregator(2000, functionNameFilter);
+          const aggregator = new StackAggregator(2000, functionNames);
           aggregator.addStacks(output);
           resolve(renderFlameGraph(aggregator.getBlocksToRender()))
         })
