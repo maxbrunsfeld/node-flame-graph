@@ -1,6 +1,8 @@
 flame-graph
 ===========
 
+[![Build Status](https://travis-ci.org/maxbrunsfeld/node-flame-graph.svg?branch=master)](https://travis-ci.org/maxbrunsfeld/node-flame-graph)
+
 This library makes it easy to profile a process with [`dtrace`](https://en.wikipedia.org/wiki/DTrace) on macOS and to format the results as a [Flame Graph](https://queue.acm.org/detail.cfm?id=2927301).
 
 ![flame graph example](./doc/flame-graph-example.png)
