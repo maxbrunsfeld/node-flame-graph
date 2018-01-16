@@ -55,8 +55,8 @@ async function test1 () {
   ))
 
   // Profile a running process
-  const flameGraph = generateFlameGraphForCommand(
-    './test arg1 arg2'
+  const flameGraph = generateFlameGraphForProcess(
+    pidToProfile,
     {
       functionNames: ['function1', 'function2']
     }
