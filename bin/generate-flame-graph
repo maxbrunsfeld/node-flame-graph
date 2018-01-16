@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+const path = require('path')
 const {argv} = require('yargs')
 const {
   generateFlameGraphForCommand,
@@ -21,7 +22,23 @@ async function main () {
     console.log(await html)
     process.exit(0)
   } else {
-    console.log(`Usage: ${process.argv[1]} [-c COMMAND | -p PID]`)
+    console.log(
+      `Usage:
+
+  ${path.basename(process.argv[1])} [-c command] [-p pid] [-f functions]
+
+Options:
+
+  -p --pid        Pid of the process to profile. Profiling will continue until
+                  that process exits or this program is killed with SIGINT.
+
+  -c --command    Command to execute with the current shell. Profiling will
+                  continue until the command exits.
+
+  -f --functions  Optional whitespace-separated list of function names to profile.
+                  The resulting flame graph will only include stacks that include
+                  these function names.`
+    )
   }
 }
 
