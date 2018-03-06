@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 const path = require('path')
-const {argv} = require('yargs')
+const args = require('minimist')(process.argv.slice(2))
 const {
   generateFlameGraphForCommand,
   generateFlameGraphForProcess
 } = require('../src/generate-flame-graph')
 
-const pid = argv.pid || argv.p
-const command = argv.command || argv.c
-let functionNames = argv.function || argv.functions || argv.f
+const pid = args.pid || args.p
+const command = args.command || args.c
+let functionNames = args.function || args.functions || args.f
 
 if (functionNames) functionNames = functionNames.split(/\s+/).map(name => name.trim())
 
