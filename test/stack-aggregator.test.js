@@ -2,6 +2,27 @@ const StackAggregator = require('../src/stack-aggregator')
 const assert = require('assert')
 
 describe('StackAggregator', () => {
+  describe('.addStacks(buffer)', () => {
+    it('adds each stack in the double-LF-separated output buffer', () => {
+      const aggregator = new StackAggregator()
+
+      aggregator.addStacks(Buffer.from([
+        'aaa\n1',
+        'bbb\naaa\n2',
+        'bbb\naaa\n2',
+        'ccc\nbbb\naaa\n3',
+        'bbb\naaa\n2',
+        'aaa\n1',
+      ].join('\n\n') + '\n\n', 'utf8'))
+
+      assert.deepEqual(aggregator.getCountedStacks(), {
+        'aaa\n1': 2,
+        'bbb\naaa\n2': 3,
+        'ccc\nbbb\naaa\n3': 1
+      })
+    })
+  })
+
   describe('.getCallTree()', () => {
     it('returns a tree representing all the stacks', () => {
       const aggregator = new StackAggregator()

@@ -9,13 +9,17 @@ class StackAggregator {
     this.countedStacks = {}
   }
 
+  getCountedStacks () {
+    return Object.assign({}, this.countedStacks)
+  }
+
   addStacks (stacks) {
     let index = 0
     while (true) {
-      const stackEndIndex = stacks.indexOf('\n\n', index)
+      const stackEndIndex = stacks.indexOf('\n\n', index, 'utf8')
       if (stackEndIndex === -1) break
-      this.addStack(stacks.slice(index, stackEndIndex))
-      index = stackEndIndex + 1
+      this.addStack(stacks.slice(index, stackEndIndex).toString('utf8'))
+      index = stackEndIndex + 2
     }
     return index
   }

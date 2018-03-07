@@ -79,7 +79,7 @@ function generateFlameGraph (args, {env = {}, functionNames, askpass} = {}) {
         }
 
         fs.closeSync(stacksOutputFile.fd)
-        fs.readFile(stacksOutputFile.path, 'utf8', (error, output) => {
+        fs.readFile(stacksOutputFile.path, (error, output) => {
           if (error) return reject(error)
 
           const aggregator = new StackAggregator(2000, functionNames);
