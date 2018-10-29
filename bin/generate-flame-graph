@@ -15,11 +15,19 @@ if (functionNames) functionNames = functionNames.split(/\s+/).map(name => name.t
 
 async function main () {
   if (command) {
-    console.log(await generateFlameGraphForCommand(command, {functionNames, fullPage: true}))
+    try {
+      console.log(await generateFlameGraphForCommand(command, {functionNames, fullPage: true}))
+    } catch (e) {
+      console.error(`Failed to generate flame graph for "${command}":\n\n${e.message}`);
+    }
   } else if (pid) {
     const {html, stop} = generateFlameGraphForProcess(pid, {functionNames, fullPage: true})
     process.on('SIGINT', () => stop())
-    console.log(await html)
+    try {
+      console.log(await html)
+    } catch (e) {
+      console.error(`Failed to generate flame graph for PID ${pid}:\n\n${e.message}`);
+    }
     process.exit(0)
   } else {
     console.log(
