@@ -85,8 +85,10 @@ class StackAggregator {
       }
 
       depth++
+      if (depth > 64) return
 
-      for (let childFrameName of Object.keys(frame.childFrames).sort()) {
+      const keys = Object.keys(frame.childFrames).sort();
+      for (let childFrameName of keys.sort()) {
         const childFrame = frame.childFrames[childFrameName]
         addFrame(childFrameName, childFrame, depth, precedingSampleCount)
         precedingSampleCount += childFrame.sampleCount
