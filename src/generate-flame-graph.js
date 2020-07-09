@@ -47,6 +47,7 @@ function generateFlameGraph (args, {env = {}, functionNames, askpass} = {}) {
   const stacksOutputFile = temp.openSync({prefix: 'trace.out'})
 
   const dtraceProcess = spawn('sudo', [
+    '-E',
     ...(askpass ? ['-A'] : []),
     'dtrace',
     '-x', 'ustackframes=100',
