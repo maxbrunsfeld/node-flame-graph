@@ -12,7 +12,7 @@
   "author": "Max Brunsfeld",
   "license": "MIT",
   "devDependencies": {
-    "mocha": "^4.0.1"
+    "mocha": "^10.2.0"
   },
   "dependencies": {
     "dedent": "^0.7.0",
